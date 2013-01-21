@@ -1,6 +1,9 @@
 /**
  * chrome storage adapter 
- * syns a user's data on google's cloud
+ * syncs a user's data on google's cloud
+ * only works in a chrome app or extension with a 
+ * manifest that has the 'storage' permission
+ * see https://developer.chrome.com/apps/storage.html
  * === 
  * - based on dom.js
  * - dom.js originally authored by Joseph Pecoraro
