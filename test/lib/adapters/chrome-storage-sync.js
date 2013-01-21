@@ -184,6 +184,8 @@ Lawnchair.adapter('chrome-storage-syn', (function() {
 
         exists: function (key, cb) { // done
             var that = this;
+
+            //this kindof violates the abstraction layer
             indexer.idx(function(the_index){
                 var exists = the_index.indexOf(key) > -1
                 that.lambda(cb).call(that, exists);
