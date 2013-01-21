@@ -214,7 +214,7 @@ Lawnchair.adapter('chrome-storage-sync', (function() {
                     for (var i = rs_keys.length - 1; i >= 0; i--) {
                         results.push(everything[rs_keys[i]])
                     };
-                    that.lambda(callback.call(everything));
+                    that.lambda(callback.call(results));
                 });
             }
             return this
