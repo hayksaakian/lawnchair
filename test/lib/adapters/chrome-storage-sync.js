@@ -100,6 +100,7 @@ Lawnchair.adapter('chrome-storage-sync', (function() {
 
         init: function (options, callback) { // done
             // consider making the indexer optional
+            this.indexer = indexer(this.name)
             if (callback) this.fn(this.name, callback).call(this, this)  
         },
         
