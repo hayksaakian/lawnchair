@@ -26,7 +26,10 @@ Lawnchair.adapter('chrome-storage-syn', (function() {
             idx: function(callback) {
                 var that = this;
                 storage.get(this.key, function(data){
-                    that.lambda(callback).call(data[that.key]) 
+                    // could be optimized
+                    var t_index = [];
+                    t_index.concat(data[that.key]);
+                    that.lambda(callback).call(t_index) 
                     // apply the callback to the index array
                 });
             },
@@ -81,25 +84,20 @@ Lawnchair.adapter('chrome-storage-syn', (function() {
                 });
             },
             // deletes a key from the index
-            del: function (key) {
+            del: function (keyOrArray) {
                 var that = this;
                 this.idx(function(the_index){
-                    the_index.splice(the_index.indexOf(key), 1);
                     var tosave = {}
+
+                    if(this.isArray(keyOrArray)){
+                        the_index = the_index.filter(function(item) {
+                            return keys.indexOf(item) === -1;
+                        });
+                    }else{
+                        the_index.splice(the_index.indexOf(keyOrArray), 1);
+                    }                 
+
                     tosave[that.key] = the_index
-                    storage.set(tosave, function() {
-                        // console.log('updated the index!')
-                    });
-                });
-            },
-            batch_del: function (keys){
-                var that = this;
-                this.idx(function(the_index){
-                    var c = the_index.filter(function(item) {
-                        return keys.indexOf(item) === -1;
-                    });
-                    var tosave = {}
-                    tosave[that.key] = c
                     storage.set(tosave, function() {
                         // console.log('updated the index!')
                     });
@@ -227,15 +225,16 @@ Lawnchair.adapter('chrome-storage-syn', (function() {
         },
         // NOTE adapters cannot set this.__results but plugins do
         // this probably should be reviewed
-        all: function (callback) {
+        all: function (callback) { // done
             var that = this;
             if (callback) {
                 storage.get(null, function(everything){
                     //you probably don't also want the index
-                    delete everything[that.key]
+                    delete everything[indexer.key]
                     //exlusion is faster for a db with > 2 keys
                     //now we want it to be an array because that's the spec
-                    var results = []
+                    // TODO: Optimize this
+                    var results = [];
                     var rs_keys = Object.keys(everything);
                     for (var i = rs_keys.length - 1; i >= 0; i--) {
                         results.push(everything[rs_keys[i]])
@@ -247,37 +246,21 @@ Lawnchair.adapter('chrome-storage-syn', (function() {
         },
         
         remove: function (keyOrArray, callback) {
-            var self = this;
-            if (this.isArray(keyOrArray)) {
-                // batch remove
-                var i, done = keyOrArray.length;
-                var removeOne = function(i) {
-                    self.remove(keyOrArray[i], function() {
-                        if ((--done) > 0) { return; }
-                        if (callback) {
-                            self.lambda(callback).call(self);
-                        }
-                    });
-                };
-                for (i=0; i < keyOrArray.length; i++)
-                    removeOne(i);
-                return this;
-            }
-            var key = this.name + '.' +
-                ((keyOrArray.key) ? keyOrArray.key : keyOrArray)
-            this.indexer.del(key)
-            storage.removeItem(key)
-            if (callback) this.lambda(callback).call(this)
+            var that = this;
+            indexer.del(keyOrArray);
+            storage.remove(keyOrArray, function(){
+                if (callback) that.lambda(callback).call(that)
+                // we made it!
+            });
             return this
         },
         
         nuke: function (callback) {
-            this.all(function(r) {
-                for (var i = 0, l = r.length; i < l; i++) {
-                    this.remove(r[i]);
-                }
-                if (callback) this.lambda(callback).call(this)
-            })
+            var that = this;
+            storage.clear(function(){
+                // wohoo! end of the world!
+                if (callback) that.lambda(callback).call(that)
+            });
             return this 
         }
 }})());
