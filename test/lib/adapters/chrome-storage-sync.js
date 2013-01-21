@@ -13,7 +13,7 @@
 // decision: use an indexer to make .keys faster? 
 // // .exists would be just as fast (you're getting one entry)
 //
-Lawnchair.adapter('chrome-storage-syn', (function() {
+Lawnchair.adapter('chrome-storage-sync', (function() {
     var storage = chrome.storage.sync
     // the indexer is an encapsulation of the helpers needed to keep an ordered index of the keys
     // the only real reason to use an index here is to make .keys faster
