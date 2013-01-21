@@ -44,12 +44,15 @@ Lawnchair.adapter('chrome-storage-syn', (function() {
                 });
             },
             // adds a key to the index
-            add: function (key) {
+            add: function (keyOrArray) {
                 var that = this;
-                this.idx(function(the_index){
-                    var a = the_index;
-                    a.push(key);
-                    // ensure no dupes
+                this.idx(function(a){
+                    // var a = the_index;
+                    if(this.isArray(keyOrArray)){
+                        a.concat(keys)
+                    }else{
+                        a.push(key);
+                    }
                     var l = a.length
                     for(var i=0; i<l; ++i) {
                         for(var j=i+1; j<l; ++j) {
@@ -59,25 +62,6 @@ Lawnchair.adapter('chrome-storage-syn', (function() {
                     }
                     var tosave = {}
                     tosave[that.key] = a;
-                    storage.set(tosave, function() {
-                        // console.log('updated the index!')
-                    });
-                });
-            },
-            batch_add: function(keys){
-                var that = this;
-                this.idx(function(the_index){
-                    a = the_index.concat(keys)
-                    var l = a.length
-                    for(var i=0; i<l; ++i) {
-                        for(var j=i+1; j<l; ++j) {
-                            if(a[i] === a[j])
-                                a.splice(j, 1);
-                        }
-                    }
-                    // storage.setItem(this.key, JSON.stringify(a))
-                    var tosave = {}
-                    tosave[that.key] = a
                     storage.set(tosave, function() {
                         // console.log('updated the index!')
                     });
@@ -150,7 +134,7 @@ Lawnchair.adapter('chrome-storage-syn', (function() {
             }
             storage.set(tosave, function(){
                 // success!
-                indexer.batch_add(that.keys_to_index);
+                indexer.add(that.keys_to_index);
                 if (callback) that.lambda(callback).call(that, that.ary);
             });
             return this
