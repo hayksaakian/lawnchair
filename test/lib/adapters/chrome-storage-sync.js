@@ -10,7 +10,7 @@
  *
  */ 
 //
-// descision: use an indexer to make .keys faster? 
+// decision: use an indexer to make .keys faster? 
 // // .exists would be just as fast (you're getting one entry)
 //
 Lawnchair.adapter('chrome-storage-syn', (function() {
@@ -211,7 +211,7 @@ Lawnchair.adapter('chrome-storage-syn', (function() {
             return this
         },
 
-        exists: function (key, cb) {
+        exists: function (key, cb) { // done
             var that = this;
             indexer.idx(function(the_index){
                 var exists = the_index.indexOf(key) > -1
@@ -228,28 +228,20 @@ Lawnchair.adapter('chrome-storage-syn', (function() {
         // NOTE adapters cannot set this.__results but plugins do
         // this probably should be reviewed
         all: function (callback) {
-            // // all does not return. handle in it's callback
-            // // note, chrome.storageArea can accept many keys for a get
-            // var idx = this.indexer.all()
-            // ,   r   = []
-            // ,   o
-            // ,   k
-            // for (var i = 0, l = idx.length; i < l; i++) {
-            //     k     = idx[i] //v
-            //     o     = JSON.parse(storage.getItem(k))
-            //     o.key = k.replace(this.name + '.', '')
-            //     r.push(o)
-            // }
             var that = this;
-            // all only responds to a callback, 
-            // no point in wasting time by getting 
-            // everything if there's no callback
             if (callback) {
-                indexer.all(function(everything){
-                    var r = []
-
-                    that.fn(that.name, callback).call(that, r)
-                });              
+                storage.get(null, function(everything){
+                    //you probably don't also want the index
+                    delete everything[that.key]
+                    //exlusion is faster for a db with > 2 keys
+                    //now we want it to be an array because that's the spec
+                    var results = []
+                    var rs_keys = Object.keys(everything);
+                    for (var i = rs_keys.length - 1; i >= 0; i--) {
+                        results.push(everything[rs_keys[i]])
+                    };
+                    that.lambda(callback.call(everything));
+                });
             }
             return this
         },
