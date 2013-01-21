@@ -23,32 +23,36 @@ Lawnchair.adapter('chrome-storage-sync', (function() {
             // the key
             key: name + '._index_',
             // returns the index, an array of keys
-            idx: function(callback) {
-                var that = this;
-                storage.get(this.key, function(data){
+            idx: function(that, callback) {
+                // var that = this;
+                var self = this;
+                storage.get(self.key, function(data){
                     // could be optimized
                     var t_index = [];
-                    t_index.concat(data[that.key]);
-                    that.lambda(callback).call(t_index) 
+                    t_index.concat(data[self.key]);
+                    console.log(t_index)
+                    callback.call(t_index) 
                     // apply the callback to the index array
                 });
             },
-            all: function(callback) {
-                var that = this;
+            all: function(that, callback) {
+                // var that = this;
+                var self = this;
                 storage.get(null, function(everything){
                     //you probably don't also want the index
-                    delete everything[that.key]
+                    delete everything[self.key]
                     //exlusion is faster for a db with > 2 keys
                     //now we want it to be an array because that's the spec
                     that.lambda(callback.call(everything));
                 });
             },
             // adds a key to the index
-            add: function (keyOrArray) {
-                var that = this;
-                this.idx(function(a){
+            add: function (that, keyOrArray) {
+                var self = this;
+                this.idx(that, function(a){
                     // var a = the_index;
-                    if(this.isArray(keyOrArray)){
+                    console.log(a)
+                    if(Array.isArray(keyOrArray)){
                         a.concat(keys)
                     }else{
                         a.push(key);
@@ -61,19 +65,19 @@ Lawnchair.adapter('chrome-storage-sync', (function() {
                         }
                     }
                     var tosave = {}
-                    tosave[that.key] = a;
+                    tosave[self.key] = a;
                     storage.set(tosave, function() {
                         // console.log('updated the index!')
                     });
                 });
             },
             // deletes a key from the index
-            del: function (keyOrArray) {
-                var that = this;
-                this.idx(function(the_index){
+            del: function (that, keyOrArray) {
+                var self = this;
+                this.idx(that, function(the_index){
                     var tosave = {}
 
-                    if(this.isArray(keyOrArray)){
+                    if(Array.isArray(keyOrArray)){
                         the_index = the_index.filter(function(item) {
                             return keys.indexOf(item) === -1;
                         });
@@ -81,7 +85,7 @@ Lawnchair.adapter('chrome-storage-sync', (function() {
                         the_index.splice(the_index.indexOf(keyOrArray), 1);
                     }                 
 
-                    tosave[that.key] = the_index
+                    tosave[self.key] = the_index
                     storage.set(tosave, function() {
                         // console.log('updated the index!')
                     });
@@ -115,7 +119,7 @@ Lawnchair.adapter('chrome-storage-sync', (function() {
             storage.set(tosave, function() {
                 // checking for existence and THEN writing is slower
                 // than just writing; Unless you keep the index in memory instead
-                that.indexer.add(key)
+                that.indexer.add(that, key)
                 // the indexer rejects dupes
                 if (callback) {
                     that.lambda(callback).call(that, obj)
@@ -135,7 +139,7 @@ Lawnchair.adapter('chrome-storage-sync', (function() {
             }
             storage.set(tosave, function(){
                 // success!
-                indexer.add(that.keys_to_index);
+                indexer.add(that, that.keys_to_index);
                 if (callback) that.lambda(callback).call(that, that.ary);
             });
             return this
@@ -146,8 +150,8 @@ Lawnchair.adapter('chrome-storage-sync', (function() {
             if (callback) {
                 var that = this;
                 //with indexer
-                storage.idx(function(the_index){
-                    that.fn('keys', callback).call(that, the_index)                    
+                storage.idx(that, function(the_index){
+                    that.lambda(callback).call(the_index)                    
                 });
                 //without indexer
                 // chrome.storage.sync.get(null, function(objs){
@@ -187,7 +191,7 @@ Lawnchair.adapter('chrome-storage-sync', (function() {
             var that = this;
 
             //this kindof violates the abstraction layer
-            indexer.idx(function(the_index){
+            indexer.idx(that, function(the_index){
                 var exists = the_index.indexOf(key) > -1
                 that.lambda(cb).call(that, exists);
             });
@@ -223,7 +227,7 @@ Lawnchair.adapter('chrome-storage-sync', (function() {
         
         remove: function (keyOrArray, callback) { // done
             var that = this;
-            indexer.del(keyOrArray);
+            indexer.del(that, keyOrArray);
             storage.remove(keyOrArray, function(){
                 if (callback) that.lambda(callback).call(that)
                 // we made it!
