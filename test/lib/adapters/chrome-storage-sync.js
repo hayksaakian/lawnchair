@@ -102,17 +102,6 @@ Lawnchair.adapter('chrome-storage-syn', (function() {
                         // console.log('updated the index!')
                     });
                 });
-            },
-            // returns index for a key
-            find: function (key, callback) {
-                this.idx(function(the_index){
-                    //
-                });
-                var a = this.all()
-                for (var i = 0, l = a.length; i < l; i++) {
-                    if (key === a[i]) return i 
-                }
-                return false
             }
         }
     }
@@ -245,7 +234,7 @@ Lawnchair.adapter('chrome-storage-syn', (function() {
             return this
         },
         
-        remove: function (keyOrArray, callback) {
+        remove: function (keyOrArray, callback) { // done
             var that = this;
             indexer.del(keyOrArray);
             storage.remove(keyOrArray, function(){
@@ -255,7 +244,7 @@ Lawnchair.adapter('chrome-storage-syn', (function() {
             return this
         },
         
-        nuke: function (callback) {
+        nuke: function (callback) { // done
             var that = this;
             storage.clear(function(){
                 // wohoo! end of the world!
