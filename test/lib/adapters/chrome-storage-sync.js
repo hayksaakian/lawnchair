@@ -32,7 +32,7 @@ Lawnchair.adapter('chrome-storage-sync', (function() {
                     // in case there is no index
                     // console.log(data)
                     t_index = t_index.concat(data[self.key]);
-                    // console.log(t_index)
+                    console.log(t_index)
                     callback.call(this, t_index) 
                     // apply the callback to the index array
                 });
@@ -52,8 +52,8 @@ Lawnchair.adapter('chrome-storage-sync', (function() {
             add: function (that, keyOrArray) {
                 // console.log('adding to index')
                 var self = this;
-                this.idx(that, function(arr){
-                    var a = arr;
+                this.idx(that, function(a){
+                    // var a = t_index;
                     // console.log(a)
                     // var a = the_index;
                     if(Array.isArray(keyOrArray)){
@@ -158,12 +158,12 @@ Lawnchair.adapter('chrome-storage-sync', (function() {
             return this
         },
 
-        batch: function (ary, callback) { // done
+        batch: function (arr, callback) { // done
             var that = this;
             var keys_to_index = [];
             var tosave = {}
-            for (var i = 0, l = ary.length; i < l; i++) {
-                var key = arr[i].key ? that.name + '.' + obj.key : that.name + '.' + that.uuid()
+            for (var i = 0, l = arr.length; i < l; i++) {
+                var key = arr[i].key ? arr[i].key : that.uuid()
                 keys_to_index.push(key);
                 tosave[key] = arr[i];
             }
@@ -174,7 +174,7 @@ Lawnchair.adapter('chrome-storage-sync', (function() {
                     // success!
                     that.indexer.add(that, that.keys_to_index);
                 }
-                if (callback) that.lambda(callback).call(that, that.ary);
+                if (callback) that.lambda(callback).call(that, that.arr);
             });
             return this
         },
@@ -185,8 +185,8 @@ Lawnchair.adapter('chrome-storage-sync', (function() {
                 var that = this;
                 //with indexer
                 that.indexer.idx(that, function(the_index){
-                    // console.log(the_index)
-                    that.lambda(callback).call(the_index)                    
+                    console.log(the_index)
+                    that.lambda(callback).call(that, the_index)                    
                 });
                 //without indexer
                 // chrome.storage.sync.get(null, function(objs){
