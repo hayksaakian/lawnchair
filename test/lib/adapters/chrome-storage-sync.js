@@ -83,7 +83,7 @@ Lawnchair.adapter('chrome-storage-sync', (function() {
 
                     if(Array.isArray(keyOrArray)){
                         the_index = the_index.filter(function(item) {
-                            return keys.indexOf(item) === -1;
+                            return keyOrArray.indexOf(item) === -1;
                         });
                     }else{
                         the_index.splice(the_index.indexOf(keyOrArray), 1);
@@ -158,6 +158,7 @@ Lawnchair.adapter('chrome-storage-sync', (function() {
                 tosave[key] = arr[i];
                 n_arr.push({key:key, value:arr[i]})
             }
+            console.log(tosave);
             storage.set(tosave, function(){
                 if(chrome.runtime.lastError){
                     console.log(chrome.runtime.lastError);
