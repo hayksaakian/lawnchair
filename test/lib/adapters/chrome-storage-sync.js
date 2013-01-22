@@ -176,7 +176,15 @@ Lawnchair.adapter('chrome-storage-sync', (function() {
                 var that = this;
                 //with indexer
                 that.indexer.idx(that, function(the_index){
-                    that.lambda(callback).call(that, the_index)                    
+                    if(the_index.length > 0){
+                        that.lambda(callback).call(that, the_index)
+                    }else{
+                        //in case the index was borked
+                        chrome.storage.sync.get(null, function(objs){
+                            var keys = Object.keys(objs);
+                            that.lambda(callback).call(that, keys)
+                        });
+                    }
                 });
                 //without indexer
                 // chrome.storage.sync.get(null, function(objs){
