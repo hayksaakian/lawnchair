@@ -150,11 +150,13 @@ Lawnchair.adapter('chrome-storage-sync', (function() {
         batch: function (arr, callback) { // done
             var that = this;
             var keys_to_index = [];
+            var n_arr = [];
             var tosave = {}
             for (var i = 0, l = arr.length; i < l; i++) {
                 var key = arr[i].key ? arr[i].key : that.uuid()
                 keys_to_index.push(key);
                 tosave[key] = arr[i];
+                n_arr.push({key:key, value:arr[i]})
             }
             storage.set(tosave, function(){
                 if(chrome.runtime.lastError){
@@ -163,7 +165,7 @@ Lawnchair.adapter('chrome-storage-sync', (function() {
                     // success!
                     that.indexer.add(that, keys_to_index);
                 }
-                if (callback) that.lambda(callback).call(that, that.arr);
+                if (callback) that.lambda(callback).call(that, n_arr);
             });
             return this
         },
@@ -246,10 +248,14 @@ Lawnchair.adapter('chrome-storage-sync', (function() {
         
         remove: function (keyOrArray, callback) { // done
             var that = this;
-            that.indexer.del(that, keyOrArray);
             storage.remove(keyOrArray, function(){
+                if(chrome.runtime.lastError){
+                    console.log(chrome.runtime.lastError);
+                }else{
+                    // console.log('updated the index!')
+                    that.indexer.del(that, keyOrArray);
+                }
                 if (callback) that.lambda(callback).call(that)
-                // we made it!
             });
             return this
         },
