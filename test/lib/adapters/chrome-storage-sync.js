@@ -167,6 +167,7 @@ Lawnchair.adapter('chrome-storage-sync', (function() {
                 keys_to_index.push(key);
                 tosave[key] = arr[i];
             }
+            console.log(tosave)
             storage.set(tosave, function(){
                 if(chrome.runtime.lastError){
                     console.log(chrome.runtime.lastError);
