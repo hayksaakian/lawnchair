@@ -30,9 +30,9 @@ Lawnchair.adapter('chrome-storage-sync', (function() {
                     // could be optimized
                     var t_index = [];
                     // in case there is no index
-                    // console.log(data)
-                    t_index = t_index.concat(data[self.key]);
-                    console.log(t_index)
+                    if(data[self.key]){
+                        t_index = t_index.concat(data[self.key]);
+                    }
                     callback.call(this, t_index) 
                     // apply the callback to the index array
                 });
@@ -50,21 +50,13 @@ Lawnchair.adapter('chrome-storage-sync', (function() {
             },
             // adds a key to the index
             add: function (that, keyOrArray) {
-                // console.log('adding to index')
                 var self = this;
                 this.idx(that, function(a){
-                    // var a = t_index;
-                    // console.log(a)
-                    // var a = the_index;
                     if(Array.isArray(keyOrArray)){
-                        // console.log('concating')
                         a = a.concat(keyOrArray)
                     }else{
-                        // console.log('pushing')
                         a.push(keyOrArray);
                     }
-                    // console.log(keyOrArray)
-                    // console.log(a)
                     var l = a.length
                     for(var i=0; i<l; ++i) {
                         for(var j=i+1; j<l; ++j) {
@@ -72,7 +64,6 @@ Lawnchair.adapter('chrome-storage-sync', (function() {
                                 a.splice(j, 1);
                         }
                     }
-                    // console.log(self.key)
                     var tosave = {}
                     tosave[self.key] = a;
                     storage.set(tosave, function() {
@@ -112,8 +103,6 @@ Lawnchair.adapter('chrome-storage-sync', (function() {
                 var self = this;
                 this.idx(self, function(the_index){
                     var exists = the_index.indexOf(key) > -1
-                    // console.log(the_index)
-                    // console.log(exists)
                     callback.call(this, exists)
                 });                
             }
@@ -167,13 +156,12 @@ Lawnchair.adapter('chrome-storage-sync', (function() {
                 keys_to_index.push(key);
                 tosave[key] = arr[i];
             }
-            console.log(tosave)
             storage.set(tosave, function(){
                 if(chrome.runtime.lastError){
                     console.log(chrome.runtime.lastError);
                 }else{
                     // success!
-                    that.indexer.add(that, that.keys_to_index);
+                    that.indexer.add(that, keys_to_index);
                 }
                 if (callback) that.lambda(callback).call(that, that.arr);
             });
@@ -186,7 +174,6 @@ Lawnchair.adapter('chrome-storage-sync', (function() {
                 var that = this;
                 //with indexer
                 that.indexer.idx(that, function(the_index){
-                    console.log(the_index)
                     that.lambda(callback).call(that, the_index)                    
                 });
                 //without indexer
@@ -225,15 +212,9 @@ Lawnchair.adapter('chrome-storage-sync', (function() {
 
         exists: function (key, cb) { // done
             var that = this;
-
-            //this kindof violates the abstraction layer
-
-
-
             that.indexer.find(that, key, function(bool){
                 that.lambda(cb).call(that, bool);
             });
-
             // without an indexer
             // storage.get(key, function(obj){
             //     var exists = Object.keys(obj).length === 0
